@@ -58,6 +58,7 @@ class AES
 
 };
 
+using namespace std;
 /*/ Entry Point /*/
 int main(int argc, char *argv[])
 {
@@ -75,6 +76,9 @@ int main(int argc, char *argv[])
 
     AES EncryptionProcess;
 
+
+    /*/ This section is responsibel for the gathering of the hex key from the arguments. /*/
+
     char string_key_word[8] = {0}; //holds a cipherkey word as char string
     int char_index = 0; // character index of the input; does not reset for each word
 
@@ -89,32 +93,28 @@ int main(int argc, char *argv[])
     }
     EncryptionProcess.Expandkey();
 
+    /*/ End section /*/
 
     char_index = 0;    
 
-    FILE *fileptr, *ofile;
-    uint8_t buffer[16];
-    long filelen;
+    ifstream fileBuffer(argv[2], ios::in|ios::binary);
+    ofstream outputBuffer(argv[3], ios::out|ios::binary);
 
-    fileptr = fopen(argv[2], "r");        // Open the file in binary mode
-    fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-    filelen = ftell(fileptr);             // Get the current byte offset in the file
-    rewind(fileptr);                      // Jump back to the beginning of the file
-
-    ofile = fopen(argv[3], "a");
-    int bufferbyte = 0;
-    uint8_t c;
-
-    for (int byte = 0; byte <= filelen; byte++)
+    if (fileBuffer.is_open())
     {
-        fscanf(fileptr, "%c", &c);
-        buffer[bufferbyte] = c;
+        /*/ this section gets the file length in bytes/*/
+        fileBuffer.seekg(0, ios::end);
+        int filelen = fileBuffer.tellg();
+        cout << "FILE LENGTH: " << filelen << "\n";
 
-        bufferbyte ++;
-        
-        if (bufferbyte == 16)
+        /*/ read bytes to buffer /*/
+        fileBuffer.seekg(0, ios::beg);
+        char buffer[16];
+
+
+        while (fileBuffer.read(buffer, sizeof(buffer)))
         {
-            bufferbyte = 0;
+            /*/ do stuff /*/
             EncryptionProcess.Block[0][0] = buffer[0];
             EncryptionProcess.Block[0][1] = buffer[1];
             EncryptionProcess.Block[0][2] = buffer[2];
@@ -144,23 +144,20 @@ int main(int argc, char *argv[])
                 }
             }
 
-            for (int x = 0; x < 16; x ++)
-            {  
-                fprintf(ofile,"%c", buffer[x]);                 
-                buffer[x] = 0x00;
-            }
+            outputBuffer.write(buffer, sizeof(buffer)); // write resulting buffer to output
+            for (int x = 0; x < 16; x ++){buffer[x] = 0x00;} // clears buffer
         }
-        /*/ handles the remainder /*/
-        else if (byte == filelen-1)
-        {
-            fprintf(ofile,"%s", buffer);
-        }
-        
-    }
-    
 
-    fclose(ofile);
-    fclose(fileptr); // Close the file
+        /*/ copys over the remaining data /*/
+        char c[1];
+        for (int i = filelen - filelen % 16; i < filelen; i++)
+        {
+            /*/ copy data over other file /*/
+            fileBuffer.read(c, sizeof(c));
+            outputBuffer.write(c, sizeof(c));
+        }
+    }
+
 }
 
 
