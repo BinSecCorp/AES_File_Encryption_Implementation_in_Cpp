@@ -17,6 +17,6 @@ Note: If the encrypted file is to be transfered to another system by any means, 
 
 # Build #
 The single source file can be simply compiled using g++.
-'''
+```
 g++ -o executable_file AES_encryption.cpp
-'''
+```
