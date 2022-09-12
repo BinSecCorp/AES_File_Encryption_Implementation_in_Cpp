@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         char buffer[16];
 
         int bytes_complete = 0; // keeps track of how many bytes have been completed for progress update
-        float percent_complete = 0.0;
+        float percent_complete;
         while (fileBuffer.read(buffer, sizeof(buffer)))
         {
             /*/ do stuff /*/
@@ -151,14 +151,17 @@ int main(int argc, char *argv[])
             
             bytes_complete = bytes_complete + 16;
             
-            /*/ prints out percentage and bytes complete every 1/2 kilobyte /*/
-            if (bytes_complete % 512 == 0)
+            /*/ prints out percentage and bytes complete every 100 kilobyte /*/
+            if (bytes_complete % (100*1024) == 0)
             {
-                percent_complete == bytes_complete / filelen * 100.0;
-                cout << percent_complete << "% complete (" << bytes_complete << " bytes)\n"; 
+    
+                percent_complete = ((float) bytes_complete / (float) filelen )* 100.0;
+                printf("%.2f", percent_complete);
+                cout << "% complete (" << bytes_complete << " bytes)\n"; 
             }
         }
 
+        cout << "Copying remaining bytes...\n";
         /*/ copys over the remaining data /*/
         char c[1];
         for (int i = filelen - filelen % 16; i < filelen; i++)
@@ -167,6 +170,8 @@ int main(int argc, char *argv[])
             fileBuffer.read(c, sizeof(c));
             outputBuffer.write(c, sizeof(c));
         }
+
+        cout << "Process Complete!\n";
     }
 
 }
