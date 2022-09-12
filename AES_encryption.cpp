@@ -66,12 +66,11 @@ int main(int argc, char *argv[])
 
     if(argv[1][1] == 'e')
     {
-        std::cout << "Encryption = True\n";
+        std::cout << "true\n";
         process = encrypt;
     }
     else
     {
-        std::cout << "Encryption = False\n";
         process = decrypt;
     }
 
@@ -112,8 +111,7 @@ int main(int argc, char *argv[])
         fileBuffer.seekg(0, ios::beg);
         char buffer[16];
 
-        int bytes_complete = 0; // keeps track of how many bytes have been completed for progress update
-        float percent_complete;
+
         while (fileBuffer.read(buffer, sizeof(buffer)))
         {
             /*/ do stuff /*/
@@ -148,20 +146,8 @@ int main(int argc, char *argv[])
 
             outputBuffer.write(buffer, sizeof(buffer)); // write resulting buffer to output
             for (int x = 0; x < 16; x ++){buffer[x] = 0x00;} // clears buffer
-            
-            bytes_complete = bytes_complete + 16;
-            
-            /*/ prints out percentage and bytes complete every 100 kilobyte /*/
-            if (bytes_complete % (100*1024) == 0)
-            {
-    
-                percent_complete = ((float) bytes_complete / (float) filelen )* 100.0;
-                printf("%.2f", percent_complete);
-                cout << "% complete (" << bytes_complete << " bytes)\n"; 
-            }
         }
 
-        cout << "Copying remaining bytes...\n";
         /*/ copys over the remaining data /*/
         char c[1];
         for (int i = filelen - filelen % 16; i < filelen; i++)
@@ -170,8 +156,6 @@ int main(int argc, char *argv[])
             fileBuffer.read(c, sizeof(c));
             outputBuffer.write(c, sizeof(c));
         }
-
-        cout << "Process Complete!\n";
     }
 
 }
